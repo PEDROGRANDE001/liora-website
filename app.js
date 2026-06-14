@@ -113,15 +113,45 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.classList.contains("open")) hide(); });
   }
 
+  function renderNavDropdown() {
+    const dd = document.getElementById("navCollections");
+    if (!dd || typeof COLLECTIONS === "undefined") return;
+    dd.innerHTML = COLLECTIONS.map(
+      (c) => `<a href="#${c.id}" data-target="${c.id}">${c.name}</a>`
+    ).join("");
+  }
+
   function wireNav() {
     const nav = document.getElementById("nav");
     const toggle = document.getElementById("navToggle");
     const links = document.getElementById("navLinks");
+    const collectionsNav = document.getElementById("collectionsNav");
+    const isMobile = () => window.matchMedia("(max-width: 820px)").matches;
+
     const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > window.innerHeight * 0.7);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     toggle.addEventListener("click", () => links.classList.toggle("open"));
-    links.addEventListener("click", (e) => { if (e.target.tagName === "A") links.classList.remove("open"); });
+
+    // Collections top link: on mobile, tap toggles the dropdown instead of jumping
+    const navTop = collectionsNav.querySelector(".nav-top");
+    navTop.addEventListener("click", (e) => {
+      if (isMobile()) { e.preventDefault(); collectionsNav.classList.toggle("open"); }
+    });
+
+    links.addEventListener("click", (e) => {
+      const a = e.target.closest("a");
+      if (!a) return;
+      if (a.dataset.target) {
+        e.preventDefault();
+        const el = document.getElementById(a.dataset.target);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (!a.classList.contains("nav-top")) {
+        links.classList.remove("open");
+        collectionsNav.classList.remove("open");
+      }
+    });
   }
 
   function wireChips() {
@@ -137,6 +167,7 @@
     renderCollections();
     renderContract();
     renderMaterials();
+    renderNavDropdown();
     wireChips();
     wireLightbox();
     wireNav();
