@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liora &amp; Co. — Outdoor Furniture Collections</title>
+  <meta name="description" content="Liora & Co. crafts premium teak and aluminium outdoor furniture for five-star hospitality and residential spaces. Explore the collections." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a href="#top" class="wordmark">LIORA &amp; CO.</a>
+    <button class="nav-toggle" aria-label="Menu" id="navToggle">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="#collections">Collections</a>
+      <a href="#contract">Contract</a>
+      <a href="#materials">Materials</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <img class="hero-img" src="img/heroes/cover.jpg" alt="Liora & Co. outdoor lounge chair" />
+    <div class="hero-overlay">
+      <h1 class="hero-wordmark">LIORA &amp; CO.</h1>
+      <p class="hero-tag">Outdoor furniture, crafted for the world's finest spaces.</p>
+      <a href="#collections" class="btn">Explore the Collections</a>
+    </div>
+  </section>
+
+  <section class="intro">
+    <p class="eyebrow">By Higney International</p>
+    <h2>Designed by operators. Built to last outdoors.</h2>
+    <p class="intro-body">
+      Liora &amp; Co. is a premium outdoor furniture brand spanning twelve collections
+      in finely sanded teak and French-made aluminium. Every piece is engineered for
+      five-star hospitality and refined residential terraces — durable in salt, sun and
+      sea, without compromise on design.
+    </p>
+  </section>
+
+  <section class="collections" id="collections">
+    <div class="section-head">
+      <p class="eyebrow">The Collections</p>
+      <h2>Twelve ways to live outdoors</h2>
+    </div>
+    <div class="collection-index" id="collectionIndex"></div>
+    <div id="collectionList"></div>
+  </section>
+
+  <section class="contract" id="contract">
+    <div class="section-head">
+      <p class="eyebrow">Contract Program</p>
+      <h2>Hospitality-grade, individually specified</h2>
+    </div>
+    <div id="contractBlock" class="contract-block"></div>
+  </section>
+
+  <section class="materials" id="materials">
+    <div class="section-head">
+      <p class="eyebrow">Material Support</p>
+      <h2>Made for the outdoors</h2>
+    </div>
+    <div id="materialsBlock" class="materials-block"></div>
+  </section>
+
+  <footer class="footer" id="contact">
+    <div class="footer-mark">LIORA &amp; CO.</div>
+    <div class="footer-cols">
+      <div>
+        <h4>Inquiries</h4>
+        <a href="mailto:hello@lioraandcompany.com">hello@lioraandcompany.com</a>
+        <a href="https://www.lioraandcompany.com" target="_blank" rel="noopener">lioraandcompany.com</a>
+      </div>
+      <div>
+        <h4>A Higney International Brand</h4>
+        <p>1720 Harrison St, Suite 16A<br />Hollywood, FL 33020<br />954-444-8754</p>
+      </div>
+    </div>
+    <p class="footer-fine">© 2025 Liora &amp; Company. All rights reserved. Specifications and finishes subject to change as part of continuous product development.</p>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+    <img id="lightboxImg" src="" alt="Specification sheet" />
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
