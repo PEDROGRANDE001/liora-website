@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collection — Liora &amp; Co.</title>
+  <meta name="description" content="Explore a Liora & Co. outdoor furniture collection: pieces, dimensions, model codes and specification sheets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=5" />
+</head>
+<body>
+  <header class="nav" id="nav" data-solid="true">
+    <a href="index.html#top" class="wordmark">LIORA &amp; CO.</a>
+    <button class="nav-toggle" aria-label="Menu" id="navToggle">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <div class="nav-item has-dropdown" id="collectionsNav">
+        <a href="index.html#collections" class="nav-top">Collections <span class="caret">▾</span></a>
+        <div class="dropdown" id="navCollections"></div>
+      </div>
+      <a href="index.html#contract">Contract</a>
+      <a href="index.html#materials">Materials</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main class="detail" id="collectionDetail"></main>
+
+  <footer class="footer" id="contact">
+    <div class="footer-mark">LIORA &amp; CO.</div>
+    <div class="footer-cols">
+      <div>
+        <h4>Inquiries</h4>
+        <a href="mailto:hello@lioraandcompany.com">hello@lioraandcompany.com</a>
+        <a href="https://www.lioraandcompany.com" target="_blank" rel="noopener">lioraandcompany.com</a>
+      </div>
+      <div>
+        <h4>A Higney International Brand</h4>
+        <p>1720 Harrison St, Suite 16A<br />Hollywood, FL 33020<br />954-444-8754</p>
+      </div>
+    </div>
+    <p class="footer-fine">© 2025 Liora &amp; Company. All rights reserved. Specifications and finishes subject to change as part of continuous product development.</p>
+  </footer>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+    <img id="lightboxImg" src="" alt="Specification sheet" />
+  </div>
+
+  <script src="data.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

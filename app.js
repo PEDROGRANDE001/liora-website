@@ -1,4 +1,4 @@
-/* Liora & Co. site — renders collections from data.js and wires interactions. */
+/* Liora & Co. site — renders the home grid and per-collection detail pages from data.js. */
 
 (function () {
   const pad = (n) => String(n).padStart(2, "0");
@@ -36,35 +36,72 @@
     return `<div class="spec-links">${thumbs}</div>`;
   }
 
-  function renderCollections() {
-    const list = document.getElementById("collectionList");
-    const index = document.getElementById("collectionIndex");
-    if (!list || typeof COLLECTIONS === "undefined") return;
-
-    index.innerHTML = COLLECTIONS.map(
-      (c) => `<button class="chip" data-target="${c.id}">${c.name}</button>`
+  /* ---------- Home: collection card grid ---------- */
+  function renderCollectionGrid() {
+    const grid = document.getElementById("collectionGrid");
+    if (!grid || typeof COLLECTIONS === "undefined") return;
+    grid.innerHTML = COLLECTIONS.map(
+      (c, i) => `
+      <a class="cc-card" href="collection.html?c=${c.id}">
+        <span class="cc-card-img">
+          <img src="${c.hero}" alt="${c.name} collection" loading="lazy" />
+        </span>
+        <span class="cc-card-body">
+          <span class="num">${pad(i + 1)}</span>
+          <span class="cc-name">${c.name}</span>
+          <span class="cc-tag">${c.tagline}</span>
+        </span>
+      </a>`
     ).join("");
+  }
 
-    list.innerHTML = COLLECTIONS.map((c, i) => {
-      const note = c.note ? `<p class="collection-note">${c.note}</p>` : "";
-      return `
-      <article class="collection" id="${c.id}">
-        <div class="collection-hero">
-          <div class="collection-figure">
-            <img src="${c.hero}" alt="${c.name} collection" loading="lazy" />
-          </div>
-          <div class="collection-copy">
-            <span class="num">${pad(i + 1)} — Collection</span>
-            <h3>${c.name}</h3>
-            <p class="tagline">${c.tagline}</p>
-            <p class="desc">${c.description}</p>
-            ${note}
-            ${productRows(c.products)}
-            ${specThumbs(c.specImages)}
-          </div>
+  /* ---------- Detail page for a single collection ---------- */
+  function renderCollectionDetail() {
+    const root = document.getElementById("collectionDetail");
+    if (!root || typeof COLLECTIONS === "undefined") return;
+
+    const id = new URLSearchParams(location.search).get("c");
+    const idx = COLLECTIONS.findIndex((c) => c.id === id);
+    const c = COLLECTIONS[idx];
+
+    if (!c) {
+      root.innerHTML = `
+        <div class="detail-missing">
+          <h2>Collection not found</h2>
+          <p><a href="index.html#collections">← Back to all collections</a></p>
+        </div>`;
+      return;
+    }
+
+    document.title = `${c.name} — Liora & Co.`;
+    const total = COLLECTIONS.length;
+    const prev = COLLECTIONS[(idx - 1 + total) % total];
+    const next = COLLECTIONS[(idx + 1) % total];
+    const note = c.note ? `<p class="collection-note">${c.note}</p>` : "";
+
+    root.innerHTML = `
+      <header class="detail-hero">
+        <img src="${c.hero}" alt="${c.name} collection" />
+        <div class="detail-hero-overlay">
+          <span class="eyebrow">Collection ${pad(idx + 1)} of ${pad(total)}</span>
+          <h1>${c.name}</h1>
+          <p class="tagline">${c.tagline}</p>
         </div>
-      </article>`;
-    }).join("");
+      </header>
+
+      <nav class="detail-crumb"><a href="index.html#collections">← All collections</a></nav>
+
+      <div class="detail-body">
+        <p class="desc">${c.description}</p>
+        ${note}
+        ${productRows(c.products)}
+        ${specThumbs(c.specImages)}
+      </div>
+
+      <nav class="detail-pager">
+        <a class="pager-prev" href="collection.html?c=${prev.id}"><span>← Previous</span><strong>${prev.name}</strong></a>
+        <a class="pager-next" href="collection.html?c=${next.id}"><span>Next →</span><strong>${next.name}</strong></a>
+      </nav>`;
   }
 
   function renderContract() {
@@ -91,10 +128,20 @@
     el.innerHTML = `<p>${MATERIALS.description}</p><div class="materials-grid">${imgs}</div>`;
   }
 
+  /* ---------- Nav dropdown (both pages) ---------- */
+  function renderNavDropdown() {
+    const dd = document.getElementById("navCollections");
+    if (!dd || typeof COLLECTIONS === "undefined") return;
+    dd.innerHTML = COLLECTIONS.map(
+      (c) => `<a href="collection.html?c=${c.id}">${c.name}</a>`
+    ).join("");
+  }
+
   function wireLightbox() {
     const lb = document.getElementById("lightbox");
     const lbImg = document.getElementById("lightboxImg");
     const close = document.getElementById("lightboxClose");
+    if (!lb) return;
     document.body.addEventListener("click", (e) => {
       const target = e.target.closest("[data-full]");
       if (target) {
@@ -113,62 +160,46 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.classList.contains("open")) hide(); });
   }
 
-  function renderNavDropdown() {
-    const dd = document.getElementById("navCollections");
-    if (!dd || typeof COLLECTIONS === "undefined") return;
-    dd.innerHTML = COLLECTIONS.map(
-      (c) => `<a href="#${c.id}" data-target="${c.id}">${c.name}</a>`
-    ).join("");
-  }
-
   function wireNav() {
     const nav = document.getElementById("nav");
     const toggle = document.getElementById("navToggle");
     const links = document.getElementById("navLinks");
     const collectionsNav = document.getElementById("collectionsNav");
+    if (!nav) return;
     const isMobile = () => window.matchMedia("(max-width: 820px)").matches;
 
-    const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > window.innerHeight * 0.7);
+    const solid = nav.dataset.solid === "true";
+    const onScroll = () => nav.classList.toggle("scrolled", solid || window.scrollY > window.innerHeight * 0.7);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    toggle.addEventListener("click", () => links.classList.toggle("open"));
 
-    // Collections top link: on mobile, tap toggles the dropdown instead of jumping
-    const navTop = collectionsNav.querySelector(".nav-top");
-    navTop.addEventListener("click", (e) => {
-      if (isMobile()) { e.preventDefault(); collectionsNav.classList.toggle("open"); }
-    });
+    if (toggle) toggle.addEventListener("click", () => links.classList.toggle("open"));
 
-    links.addEventListener("click", (e) => {
-      const a = e.target.closest("a");
-      if (!a) return;
-      if (a.dataset.target) {
-        e.preventDefault();
-        const el = document.getElementById(a.dataset.target);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      if (!a.classList.contains("nav-top")) {
-        links.classList.remove("open");
-        collectionsNav.classList.remove("open");
-      }
-    });
-  }
+    if (collectionsNav) {
+      const navTop = collectionsNav.querySelector(".nav-top");
+      navTop.addEventListener("click", (e) => {
+        if (isMobile()) { e.preventDefault(); collectionsNav.classList.toggle("open"); }
+      });
+    }
 
-  function wireChips() {
-    document.getElementById("collectionIndex").addEventListener("click", (e) => {
-      const chip = e.target.closest(".chip");
-      if (!chip) return;
-      const el = document.getElementById(chip.dataset.target);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    if (links) {
+      links.addEventListener("click", (e) => {
+        const a = e.target.closest("a");
+        if (!a) return;
+        if (!a.classList.contains("nav-top")) {
+          links.classList.remove("open");
+          if (collectionsNav) collectionsNav.classList.remove("open");
+        }
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    renderCollections();
+    renderNavDropdown();
+    renderCollectionGrid();
+    renderCollectionDetail();
     renderContract();
     renderMaterials();
-    renderNavDropdown();
-    wireChips();
     wireLightbox();
     wireNav();
   });
