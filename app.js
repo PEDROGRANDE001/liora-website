@@ -3,6 +3,19 @@
 (function () {
   const pad = (n) => String(n).padStart(2, "0");
 
+  /* Product-type taxonomy — derived from piece names across all collections. */
+  const PRODUCT_TYPES = [
+    { id: "sofas", label: "Sofas & Seating", match: (n) => /seater sofa|corner seater/i.test(n) },
+    { id: "ottomans", label: "Ottomans", match: (n) => /ottoman/i.test(n) },
+    { id: "coffee-tables", label: "Coffee Tables", match: (n) => /coffee table/i.test(n) },
+    { id: "side-tables", label: "Side Tables", match: (n) => /side table/i.test(n) || /^hex table$/i.test(n) || /^square table$/i.test(n) },
+    { id: "dining-chairs", label: "Dining Chairs", match: (n) => /dining (arm )?chair|arm dining chair/i.test(n) },
+    { id: "dining-tables", label: "Dining Tables", match: (n) => /dining table/i.test(n) },
+    { id: "loungers", label: "Sun Loungers & Beds", match: (n) => /lounger/i.test(n) },
+    { id: "stools", label: "Bar & Counter Stools", match: (n) => /stool/i.test(n) },
+    { id: "bar-tables", label: "Bar & Counter Tables", match: (n) => /counter table/i.test(n) }
+  ];
+
   function productRows(products) {
     if (!products || !products.length) return "";
     const rows = products
@@ -104,6 +117,48 @@
       </nav>`;
   }
 
+  /* ---------- Type detail page (all pieces of one type, across collections) ---------- */
+  function renderTypeDetail() {
+    const root = document.getElementById("typeDetail");
+    if (!root || typeof COLLECTIONS === "undefined") return;
+
+    const id = new URLSearchParams(location.search).get("t");
+    const type = PRODUCT_TYPES.find((t) => t.id === id);
+
+    if (!type) {
+      root.innerHTML = `
+        <div class="detail-missing">
+          <h2>Product type not found</h2>
+          <p><a href="index.html#collections">← Back to collections</a></p>
+        </div>`;
+      return;
+    }
+
+    document.title = `${type.label} — Liora & Co.`;
+    let count = 0;
+    const blocks = COLLECTIONS.map((c) => {
+      const items = (c.products || []).filter((p) => type.match(p.name));
+      if (!items.length) return "";
+      count += items.length;
+      return `
+        <section class="type-group">
+          <h2 class="type-group-head"><a href="collection.html?c=${c.id}">${c.name}</a></h2>
+          ${productRows(items)}
+        </section>`;
+    }).join("");
+
+    root.innerHTML = `
+      <header class="type-head">
+        <span class="eyebrow">By Product Type</span>
+        <h1>${type.label}</h1>
+        <p class="type-count">${count} ${count === 1 ? "piece" : "pieces"} across the collections</p>
+      </header>
+      <nav class="detail-crumb"><a href="index.html#collections">← All collections</a></nav>
+      <div class="type-body">
+        ${blocks || '<p class="type-empty">No catalogued pieces in this category yet.</p>'}
+      </div>`;
+  }
+
   function renderContract() {
     const el = document.getElementById("contractBlock");
     if (!el || typeof CONTRACT === "undefined") return;
@@ -128,13 +183,20 @@
     el.innerHTML = `<p>${MATERIALS.description}</p><div class="materials-grid">${imgs}</div>`;
   }
 
-  /* ---------- Nav dropdown (both pages) ---------- */
+  /* ---------- Nav dropdowns (all pages) ---------- */
   function renderNavDropdown() {
     const dd = document.getElementById("navCollections");
-    if (!dd || typeof COLLECTIONS === "undefined") return;
-    dd.innerHTML = COLLECTIONS.map(
-      (c) => `<a href="collection.html?c=${c.id}">${c.name}</a>`
-    ).join("");
+    if (dd && typeof COLLECTIONS !== "undefined") {
+      dd.innerHTML = COLLECTIONS.map(
+        (c) => `<a href="collection.html?c=${c.id}">${c.name}</a>`
+      ).join("");
+    }
+    const td = document.getElementById("navTypes");
+    if (td) {
+      td.innerHTML = PRODUCT_TYPES.map(
+        (t) => `<a href="type.html?t=${t.id}">${t.label}</a>`
+      ).join("");
+    }
   }
 
   function wireLightbox() {
@@ -164,7 +226,6 @@
     const nav = document.getElementById("nav");
     const toggle = document.getElementById("navToggle");
     const links = document.getElementById("navLinks");
-    const collectionsNav = document.getElementById("collectionsNav");
     if (!nav) return;
     const isMobile = () => window.matchMedia("(max-width: 820px)").matches;
 
@@ -175,12 +236,19 @@
 
     if (toggle) toggle.addEventListener("click", () => links.classList.toggle("open"));
 
-    if (collectionsNav) {
-      const navTop = collectionsNav.querySelector(".nav-top");
-      navTop.addEventListener("click", (e) => {
-        if (isMobile()) { e.preventDefault(); collectionsNav.classList.toggle("open"); }
+    const dropdowns = Array.from(document.querySelectorAll(".has-dropdown"));
+    dropdowns.forEach((dd) => {
+      const top = dd.querySelector(".nav-top");
+      if (!top) return;
+      const noJump = top.getAttribute("href") === "#";
+      top.addEventListener("click", (e) => {
+        if (isMobile() || noJump) {
+          e.preventDefault();
+          dropdowns.forEach((other) => { if (other !== dd) other.classList.remove("open"); });
+          dd.classList.toggle("open");
+        }
       });
-    }
+    });
 
     if (links) {
       links.addEventListener("click", (e) => {
@@ -188,7 +256,7 @@
         if (!a) return;
         if (!a.classList.contains("nav-top")) {
           links.classList.remove("open");
-          if (collectionsNav) collectionsNav.classList.remove("open");
+          dropdowns.forEach((dd) => dd.classList.remove("open"));
         }
       });
     }
@@ -198,6 +266,7 @@
     renderNavDropdown();
     renderCollectionGrid();
     renderCollectionDetail();
+    renderTypeDetail();
     renderContract();
     renderMaterials();
     wireLightbox();
