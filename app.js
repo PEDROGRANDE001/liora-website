@@ -218,10 +218,19 @@
       const items = (c.products || []).filter((p) => type.match(p.name));
       if (!items.length) return "";
       count += items.length;
+      const cards = items
+        .map(
+          (p) => `
+          <a class="pg-card" href="model.html?c=${c.id}&code=${p.code}">
+            <span class="pg-img"><img src="img/products/${p.code}.jpg" alt="${p.name}" loading="lazy" /></span>
+            <span class="pg-body"><span class="pg-name">${p.name}</span></span>
+          </a>`
+        )
+        .join("");
       return `
         <section class="type-group">
           <h2 class="type-group-head"><a href="collection.html?c=${c.id}">${c.name}</a></h2>
-          ${productRows(items)}
+          <div class="product-gallery">${cards}</div>
         </section>`;
     }).join("");
 
