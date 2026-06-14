@@ -99,18 +99,18 @@
       const target = e.target.closest("[data-full]");
       if (target) {
         lbImg.src = target.getAttribute("data-full");
-        lb.hidden = false;
+        lb.classList.add("open");
         document.body.style.overflow = "hidden";
       }
     });
     const hide = () => {
-      lb.hidden = true;
+      lb.classList.remove("open");
       lbImg.src = "";
       document.body.style.overflow = "";
     };
     close.addEventListener("click", hide);
     lb.addEventListener("click", (e) => { if (e.target === lb) hide(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) hide(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lb.classList.contains("open")) hide(); });
   }
 
   function wireNav() {
