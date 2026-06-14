@@ -35,6 +35,26 @@
       </table>`;
   }
 
+  function productGallery(c) {
+    const items = c.products || [];
+    if (!items.length) return "";
+    const cards = items
+      .map(
+        (p) => `
+        <a class="pg-card" href="model.html?c=${c.id}&code=${p.code}">
+          <span class="pg-img"><img src="img/products/${p.code}.jpg" alt="${p.name}" loading="lazy" /></span>
+          <span class="pg-body">
+            <span class="pg-name">${p.name}</span>
+            <span class="pg-code">${p.code}</span>
+          </span>
+        </a>`
+      )
+      .join("");
+    return `
+      <div class="product-gallery-head"><h2>The pieces</h2><p>Select any piece for full dimensions and specification.</p></div>
+      <div class="product-gallery">${cards}</div>`;
+  }
+
   function specThumbs(images) {
     if (!images || !images.length) return "";
     const thumbs = images
@@ -107,14 +127,72 @@
       <div class="detail-body">
         <p class="desc">${c.description}</p>
         ${note}
-        ${productRows(c.products)}
-        ${specThumbs(c.specImages)}
       </div>
+
+      <section class="gallery-section">${productGallery(c)}</section>
+
+      ${c.specImages && c.specImages.length ? `<div class="detail-body"><h3 class="spec-heading">Specification sheets</h3>${specThumbs(c.specImages)}</div>` : ""}
 
       <nav class="detail-pager">
         <a class="pager-prev" href="collection.html?c=${prev.id}"><span>← Previous</span><strong>${prev.name}</strong></a>
         <a class="pager-next" href="collection.html?c=${next.id}"><span>Next →</span><strong>${next.name}</strong></a>
       </nav>`;
+  }
+
+  /* ---------- Single-model detail page ---------- */
+  function renderModelDetail() {
+    const root = document.getElementById("modelDetail");
+    if (!root || typeof COLLECTIONS === "undefined") return;
+
+    const params = new URLSearchParams(location.search);
+    const cid = params.get("c");
+    const code = params.get("code");
+    const c = COLLECTIONS.find((x) => x.id === cid);
+    const items = c ? c.products || [] : [];
+    const idx = items.findIndex((p) => p.code === code);
+    const p = items[idx];
+
+    if (!c || !p) {
+      root.innerHTML = `
+        <div class="detail-missing">
+          <h2>Piece not found</h2>
+          <p><a href="index.html#collections">← Back to all collections</a></p>
+        </div>`;
+      return;
+    }
+
+    document.title = `${p.name} — ${c.name} — Liora & Co.`;
+    const prev = items[(idx - 1 + items.length) % items.length];
+    const next = items[(idx + 1) % items.length];
+
+    root.innerHTML = `
+      <nav class="detail-crumb">
+        <a href="index.html#collections">All collections</a>
+        <span class="crumb-sep">/</span>
+        <a href="collection.html?c=${c.id}">${c.name}</a>
+      </nav>
+
+      <div class="model-detail">
+        <div class="model-media">
+          <img src="img/products/${p.code}.jpg" data-full="img/products/${p.code}.jpg" alt="${p.name}" />
+        </div>
+        <div class="model-info">
+          <span class="eyebrow">${c.name} Collection</span>
+          <h1>${p.name}</h1>
+          <dl class="model-spec">
+            <div><dt>Dimensions (W × D × H)</dt><dd>${p.cm} cm<span class="dim-in">${p.in}</span></dd></div>
+            <div><dt>Model code</dt><dd class="model-code">${p.code}</dd></div>
+          </dl>
+          <p class="model-note">Finely sanded teak / French aluminium. Specifications subject to change as part of continuous product development.</p>
+          <a class="btn btn-line" href="index.html#contact">Inquire about this piece</a>
+        </div>
+      </div>
+
+      ${items.length > 1 ? `
+      <nav class="detail-pager model-pager">
+        <a class="pager-prev" href="model.html?c=${c.id}&code=${prev.code}"><span>← Previous</span><strong>${prev.name}</strong></a>
+        <a class="pager-next" href="model.html?c=${c.id}&code=${next.code}"><span>Next →</span><strong>${next.name}</strong></a>
+      </nav>` : ""}`;
   }
 
   /* ---------- Type detail page (all pieces of one type, across collections) ---------- */
@@ -266,6 +344,7 @@
     renderNavDropdown();
     renderCollectionGrid();
     renderCollectionDetail();
+    renderModelDetail();
     renderTypeDetail();
     renderContract();
     renderMaterials();
